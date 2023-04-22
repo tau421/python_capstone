@@ -1,16 +1,30 @@
 """Models for favorite orders app."""
 
 import os
+from flask import Flask
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, SubmitField
+from flask_login import LoginManager, login_user, login_required, current_user, UserMixin, logout_user
+from wtforms.validators import DataRequired, Length, ValidationError
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+app = Flask(__name__)
+db = SQLAlchemy(app)
 
-class User(db.Model):
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+class LoginForm(FlaskForm):
+    username = StringField(label='Username', validators=[Length(3,19)])
+    password = StringField(label='Password', validators=[Length(3,19)])
+    submit = SubmitField(label='Submit')
+
+class User(db.Model, UserMixin):
     """A user."""
 
     __tablename__ = "users"
 
-    user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username = db.Column(db.String, unique=True)
     password = db.Column(db.String)
 
@@ -19,7 +33,7 @@ class User(db.Model):
     def create_user(cls, username, password):
         """Create and return a new user."""
 
-        return cls(user=username, password=password)
+        return cls(username=username, password=password)
     
     @classmethod
     def get_user_by_id(cls, user_id):
@@ -31,20 +45,20 @@ class User(db.Model):
     def get_user_by_username(cls, username):
         """Return user from username."""
 
-        return cls.query.filter(User.username == username).first()
+        return cls.query.filter_by(username = username).first()
     
     @classmethod
     def get_all_users(cls):
         return cls.query.all()
     
-    # def get_restaurants_by_user_id(user_id):
-    #     """Return user's restaurants."""
+    def get_restaurants_by_user_id(self):
+        """Return user's restaurants."""
 
-    #     return Restaurant.query.get(user_id)
+        return Restaurant.query.filter_by(user_id = self.user_id).all
 
     def __repr__(self):
         return f'<User user_id={self.user_id} username={self.username}>'
-    
+
 class Restaurant(db.Model):
     """A restaurant."""
 
@@ -55,16 +69,11 @@ class Restaurant(db.Model):
     menu_link = db.Column(db.String, nullable=True)
     restaurant_image = db.Column(db.String, nullable=True)
     is_favorite = db.Column(db.Boolean)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     user = db.relationship("User", backref="restaurants")
 
     """Classmethods."""
-    @classmethod
-    def create_restaurant(cls, user, restaurant_name, menu_link, restaurant_image, is_favorite):
-        """Create and return a new restaurant."""
-
-        return cls(user=user, restaurant_name=restaurant_name, menu_link=menu_link, restaurant_image=restaurant_image, is_favorite=is_favorite)
 
     @classmethod
     def get_all_restaurants(cls):
@@ -78,10 +87,10 @@ class Restaurant(db.Model):
 
         return cls.query.get(restaurant_id)
 
-    # def get_orders_by_restaurant_id(restaurant_id):
-    #     """Return orders from specific restaurant."""
+    def get_orders_by_restaurant_id(restaurant_id):
+        """Return orders from specific restaurant."""
 
-    #     return Order.query.get(restaurant_id)
+        return Order.query.filter_by(restaurant_id)
 
     def __repr__(self):
         return f'<Restaurant restaurant_id={self.restaurant_id} restaurant_name={self.restaurant_name}>'
@@ -113,6 +122,8 @@ class Order(db.Model):
 
         order = cls.query.get(order_id)
         order.order_description = new_description
+
+db.create_all()
 
 def connect_to_db(flask_app, echo=True):
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["POSTGRES_URI"]
