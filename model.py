@@ -19,6 +19,12 @@ class LoginForm(FlaskForm):
     password = StringField(label='Password', validators=[Length(3,19)])
     submit = SubmitField(label='Submit')
 
+class RestaurantForm(FlaskForm):
+    restaurant_name = StringField(label = "Restaurant Name")
+    menu_link = StringField(label = "Menu URL")
+    restaurant_image = StringField(label = "Image URL")
+    submit = SubmitField(label = "Submit")
+
 class User(db.Model, UserMixin):
     """A user."""
 
@@ -57,57 +63,40 @@ class User(db.Model, UserMixin):
         return Restaurant.query.filter_by(user_id = self.user_id).all
 
     def __repr__(self):
-        return f'<User user_id={self.user_id} username={self.username}>'
+        return f'<User id={self.id} username={self.username}>'
 
 class Restaurant(db.Model):
     """A restaurant."""
 
     __tablename__ = "restaurants"
 
-    restaurant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     restaurant_name = db.Column(db.String)
     menu_link = db.Column(db.String, nullable=True)
     restaurant_image = db.Column(db.String, nullable=True)
     is_favorite = db.Column(db.Boolean)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
 
     user = db.relationship("User", backref="restaurants")
 
     """Classmethods."""
-
-    @classmethod
-    def get_all_restaurants(cls):
-        """Return all restaurants."""
-
-        return cls.query.all()
     
-    @classmethod
-    def get_restaurant_by_restaurant_id(cls, restaurant_id):
-        """Return a restaurant by restaurant id."""
-
-        return cls.query.get(restaurant_id)
-
-    def get_orders_by_restaurant_id(restaurant_id):
-        """Return orders from specific restaurant."""
-
-        return Order.query.filter_by(restaurant_id)
-
     def __repr__(self):
-        return f'<Restaurant restaurant_id={self.restaurant_id} restaurant_name={self.restaurant_name}>'
+        return f'<Restaurant id={self.id} restaurant_name={self.restaurant_name}>'
 
 class Order(db.Model):
     """An order."""
 
     __tablename__ = "orders"
 
-    order_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     order_description = db.Column(db.String)
-    restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurants.restaurant_id"))
+    restaurant_id = db.Column(db.Integer, db.ForeignKey(Restaurant.id))
 
     restaurant = db.relationship("Restaurant", backref="orders")
 
     def __repr__(self):
-        return f'<Order order_id={self.order_id} order_description={self.order_description}>'
+        return f'<Order id={self.id} order_description={self.order_description}>'
  
     """Classmethods."""
     @classmethod

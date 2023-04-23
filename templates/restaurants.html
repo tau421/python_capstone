@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Restaurants{% endblock %}
+{% block body %}
+{% block container %}
+<div class="top-pad">
+    <div class="well">
+        <h2>
+            Add a Restaurant
+            <form action="/restaurants", method="POST">
+                {{form.restaurant_name.label}}: {{form.restaurant_name()}}<br>
+                {{form.menu_link.label}}: {{form.menu_link()}}<br>
+                {{form.restaurant_image.label}}: {{form.restaurant_image()}}
+                {{form.submit()}}
+            </form>
+        </h2>
+    </div>
+    <div class="well">
+        {% for restaurant in restaurants %}
+        {{restaurant.restaurant_name}}: {{restaurant.user_id}}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% endblock %}
