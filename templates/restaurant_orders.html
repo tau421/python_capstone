@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ restaurant.restaurant_name }} - Orders{% endblock %}
+
+{% block body %}
+<h1>{{ restaurant.restaurant_name }}</h1>
+
+<p>
+  <a href="{{ restaurant.menu_link}}" label="Menu">Menu</a>
+</p>
+
+<div class="top-pad">
+    <div class="well">
+        <h2>
+            Create an Order
+            <form action="/restaurants/{{ restaurant.id }}/orders", method="POST">
+                {{form.text.label}}: {{form.text()}}<br>
+                {{form.submit()}}
+            </form>
+        </h2>
+    </div>
+</div>
+{% for orders in orders %}
+{{ orders.text }}
+{% endfor %}
+<img src="{{ restaurant.restaurant_image }}">
+{% endblock %}

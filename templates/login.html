@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Log-In{% endblock %}
+
+{% block body %}
+    <h1> Welcome!  Please log-in.</h1>
+    <div class="top-pad">
+        <div class="well">
+            <h2>
+                Log-In Here
+                <form action="/login", method="POST">
+                    {{form.username.label}}: {{form.username()}}<br>
+                    {{form.password.label}}: {{form.password()}}<br>
+                    {{form.submit()}}
+                </form>
+            </h2>
+        </div>
+    </div>
+{% endblock %}

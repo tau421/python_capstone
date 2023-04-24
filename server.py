@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, session, redirect, url
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, login_required, current_user, UserMixin, logout_user
 
-from model import connect_to_db, db, User, Restaurant, Order, LoginForm, RestaurantForm
+from model import connect_to_db, db, User, Restaurant, Order, LoginForm, RestaurantForm, OrderForm
 
 from jinja2 import StrictUndefined
 
@@ -56,10 +56,10 @@ def signup_user():
         db.session.commit()
         login_user(user)
         flash("Account created.  Please log in.")
+        return redirect("/login")
     else:
-       flash("Can't create an account with that username.  Please try again.")
-
-    return redirect("/")
+        flash("Can't create an account with that username.  Please try again.")
+        return redirect("/signup")
 
 @app.route("/login", methods=["POST"])
 def handle_login():
@@ -71,17 +71,34 @@ def handle_login():
         return redirect("/restaurants")
     else:
         flash("Wrong username or password.")
-        return redirect("/")
+        return redirect("/login")
 
-@app.route("/users/<user_id>")
-def show_user(user_id):
-    """Show details for a specific user."""
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user
+    flash("You are now logged out.")
+    return redirect("/")
 
-    user = User.get_user_by_id(user_id)
+@app.route("/restaurants/<id>", methods=["GET"])
+@login_required
+def show_orders(id):
+    """Show orders for a particular restaurant."""
 
-    return render_template("user_details.html", user=user)
+    restaurant = Restaurant.get_by_id(id)
+    orders = Order.query.filter_by(restaurant_id = id).all()
+    return render_template("/restaurant_orders.html", restaurant=restaurant, orders=orders, form = OrderForm())
 
-### Need to add orders ###
+@app.route("/restaurants/<id>/orders", methods=["POST"])
+@login_required
+def create_order(id):
+    """Create a new order for the restaurant."""
+
+    restaurant = Restaurant.get_by_id(id)
+    o = Order(text = request.form["text"], restaurant=restaurant)
+    db.session.add(o)
+    db.session.commit()
+    return redirect(f"/restaurants/{id}")
 
 if __name__ == "__main__":
     connect_to_db(app)

@@ -25,6 +25,10 @@ class RestaurantForm(FlaskForm):
     restaurant_image = StringField(label = "Image URL")
     submit = SubmitField(label = "Submit")
 
+class OrderForm(FlaskForm):
+    text = StringField(label = "Order")
+    submit = SubmitField(label = "Submit")
+
 class User(db.Model, UserMixin):
     """A user."""
 
@@ -81,6 +85,10 @@ class Restaurant(db.Model):
 
     """Classmethods."""
     
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.get(id)
+
     def __repr__(self):
         return f'<Restaurant id={self.id} restaurant_name={self.restaurant_name}>'
 
@@ -90,27 +98,17 @@ class Order(db.Model):
     __tablename__ = "orders"
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    order_description = db.Column(db.String)
+    text = db.Column(db.String)
     restaurant_id = db.Column(db.Integer, db.ForeignKey(Restaurant.id))
 
     restaurant = db.relationship("Restaurant", backref="orders")
 
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.get(id)
+
     def __repr__(self):
-        return f'<Order id={self.id} order_description={self.order_description}>'
- 
-    """Classmethods."""
-    @classmethod
-    def create_order(cls, restaurant, order_description):
-        """Create and return a new order."""
-
-        return cls(restaurant=restaurant, order_description=order_description)
-    
-    @classmethod
-    def update_order(cls, order_id, new_description):
-        """Update an order given order_id and updated order."""
-
-        order = cls.query.get(order_id)
-        order.order_description = new_description
+        return f'<Order id={self.id} text={self.text}>'
 
 db.create_all()
 
