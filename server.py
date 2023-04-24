@@ -113,6 +113,7 @@ def delete_user():
     if user.id == current_user.id:
         db.session.delete(user)
         db.session.commit()
+    flash("User deleted.")
     return redirect("/")
 
 @app.route("/edit_user", methods=["POST"])
@@ -124,7 +125,12 @@ def edit_user():
     if user.id == current_user.id:
         current_user.username = new_username
     db.session.commit()
+    flash("Username updated.")
     return redirect("/")
+
+@app.errorhandler(401)
+def unauthorized_page(error):
+    return render_template("401.html"), 401
 
 if __name__ == "__main__":
     connect_to_db(app)

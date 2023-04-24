@@ -15,8 +15,10 @@
         </h2>
     </div>
     <div class="well">
+        <br><br><h2>Click the restaurant image to go to the orders page.</h2><br><br>
         {% for restaurant in restaurants %}
-        <a href="restaurants/{{restaurant.id}}"> {{restaurant.restaurant_name}}</a>
+        <h2><br>{{ restaurant.restaurant_name }} <br></h2>
+        <a href="restaurants/{{restaurant.id}}"><img src="{{ restaurant.restaurant_image }}"></a><br><br>
         {% endfor %}
     </div>
 </div>
