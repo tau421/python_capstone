@@ -3,7 +3,7 @@
 import os
 from flask import Flask
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField
+from wtforms import StringField, SelectField, SubmitField, HiddenField
 from flask_login import LoginManager, login_user, login_required, current_user, UserMixin, logout_user
 from wtforms.validators import DataRequired, Length, ValidationError
 from flask_sqlalchemy import SQLAlchemy
@@ -111,6 +111,19 @@ class Order(db.Model):
         return f'<Order id={self.id} text={self.text}>'
 
 db.create_all()
+
+def get_editForm(user_id):
+    class LoginForm(FlaskForm):
+        username = StringField(label='New Username', validators=[Length(3,19)])
+        id = HiddenField(label="id", default=user_id)
+        submit = SubmitField(label='Change Username')
+    return LoginForm()
+
+def get_deleteForm(user_id):
+    class LoginForm(FlaskForm):
+        id = HiddenField(label="id", default=user_id)
+        submit = SubmitField(label = "Delete User")
+    return LoginForm()
 
 def connect_to_db(flask_app, echo=True):
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["POSTGRES_URI"]

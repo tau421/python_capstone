@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, session, redirect, url
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, login_required, current_user, UserMixin, logout_user
 
-from model import connect_to_db, db, User, Restaurant, Order, LoginForm, RestaurantForm, OrderForm
+from model import connect_to_db, db, User, Restaurant, Order, LoginForm, RestaurantForm, OrderForm, get_deleteForm, get_editForm
 
 from jinja2 import StrictUndefined
 
@@ -76,7 +76,7 @@ def handle_login():
 @app.route("/logout")
 @login_required
 def logout():
-    logout_user
+    logout_user()
     flash("You are now logged out.")
     return redirect("/")
 
@@ -99,6 +99,32 @@ def create_order(id):
     db.session.add(o)
     db.session.commit()
     return redirect(f"/restaurants/{id}")
+
+@app.route("/settings", methods=["GET"])
+@login_required
+def settings():
+    return render_template("/settings.html", delete_form = get_deleteForm(current_user.id), edit_form = get_editForm(current_user.id))
+
+@app.route("/delete_user", methods=["POST"])
+@login_required
+def delete_user():
+    id = int(request.form["id"])
+    user = User.query.filter_by(id=id).first()
+    if user.id == current_user.id:
+        db.session.delete(user)
+        db.session.commit()
+    return redirect("/")
+
+@app.route("/edit_user", methods=["POST"])
+@login_required
+def edit_user():
+    id = int(request.form["id"])
+    user = User.query.filter_by(id=id).first()
+    new_username = request.form["username"]
+    if user.id == current_user.id:
+        current_user.username = new_username
+    db.session.commit()
+    return redirect("/")
 
 if __name__ == "__main__":
     connect_to_db(app)
