@@ -6,13 +6,13 @@
     <div class="top-pad">
         <div class="well">
             <h2>
-                Delete Your Account
-                <form action="/delete_user", method="POST">
-                    {{delete_form.id()}} {{delete_form.submit()}}
-                </form><br>
                 Change Your Username
                 <form action="/edit_user", method="POST">
                     {{edit_form.username()}} {{edit_form.id()}} {{edit_form.submit()}}
+                </form><br>
+                Delete Your Account
+                <form action="/delete_user", method="POST">
+                    {{delete_form.id()}} {{delete_form.submit()}}
                 </form><br>
             </h2>
         </div>
